@@ -11,7 +11,7 @@ const CustomersPage = () => {
       <Navtab parentPage={"customers"} />
       <Routes>
         <Route path="all" element={<CustomersAllTab />} />
-        <Route path="details" element={<CustomerDetailsTab />} />
+        <Route path="details/:id" element={<CustomerDetailsTab />} />
         <Route path="add" element={<AddCustomerTab />} />
         <Route path="update" element={<UpdateCustomerTab />} />
       </Routes>
