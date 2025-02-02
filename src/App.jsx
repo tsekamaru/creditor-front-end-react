@@ -1,4 +1,6 @@
 import { Routes, Route } from "react-router-dom";
+import { Slide, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import Navbar from "./components/Navbar";
 import HomePage from "./pages/main/HomePage";
@@ -18,6 +20,18 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="*" element={<ErrorPage />} />
       </Routes>
+
+      {/* Global Toast Container (Always Available) */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={true}
+        closeOnClick={true}
+        theme="colored"
+        transition={Slide}
+        newestOnTop={true}
+        pauseOnFocusLoss={false}
+      />
     </div>
   );
 }

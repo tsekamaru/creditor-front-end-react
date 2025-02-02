@@ -13,7 +13,7 @@ const CustomersPage = () => {
         <Route path="all" element={<CustomersAllTab />} />
         <Route path="details/:id" element={<CustomerDetailsTab />} />
         <Route path="add" element={<AddCustomerTab />} />
-        <Route path="update" element={<UpdateCustomerTab />} />
+        <Route path="update/:id" element={<UpdateCustomerTab />} />
       </Routes>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_URL } from "../../config";
 import IdsContext from "../../contexts/IdsContext";
 
 const CustomersAllTab = () => {
@@ -9,8 +10,6 @@ const CustomersAllTab = () => {
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const { ids, setIds } = useContext(IdsContext);
-
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5005";
 
   useEffect(() => {
     axios
@@ -21,7 +20,7 @@ const CustomersAllTab = () => {
         setError(true);
       })
       .finally(() => setLoading(false));
-  }, [API_URL]);
+  }, []);
 
   if (loading)
     return (
@@ -44,12 +43,14 @@ const CustomersAllTab = () => {
       <div className="table-responsive">
         <table className="table table-hover">
           <thead>
-            <tr className="table-dark text-center">
+            <tr className="table-dark text-center text-center align-middle">
               <th>ID</th>
               <th>First Name</th>
               <th>Last Name</th>
-              <th>Date of Birth</th>
-              <th>Loans</th>
+              <th style={{ minWidth: "8rem" }}>Date of Birth</th>
+              <th>Credit Score*</th>
+              <th>Phone Number</th>
+              <th>Email</th>
             </tr>
           </thead>
           <tbody>
@@ -67,11 +68,19 @@ const CustomersAllTab = () => {
                 <td className="p-3">{customer.firstName}</td>
                 <td className="p-3">{customer.lastName}</td>
                 <td className="p-3">{customer.dateOfBirth}</td>
-                <td className="p-3">{customer.loanId.length}</td>
+                <td className="p-3">
+                  <span className="fs-5">★</span>
+                  {customer.creditScore}
+                </td>
+                <td className="p-3">{customer.phoneNumber}</td>
+                <td className="p-3">{customer.email}</td>
               </tr>
             ))}
           </tbody>
         </table>
+        <p className="text-end fw-semibold fs-6">
+          <small>Credit score is out of 5.0*</small>
+        </p>
       </div>
     </div>
   );

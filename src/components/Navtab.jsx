@@ -20,7 +20,7 @@ const Navtab = ({ parentPage }) => {
       label: "Details",
     },
     { path: "add", label: "Add" },
-    { path: "update", label: "Update" },
+    { path: `update/${ids[idKeyMap[parentPage]]}`, label: "Update" },
   ];
 
   return (

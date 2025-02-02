@@ -11,7 +11,7 @@ function Navbar() {
 
   return (
     <nav
-      className="navbar sticky-top navbar-expand-md bg-dark border-bottom border-body"
+      className="navbar sticky-top navbar-expand-sm bg-dark border-bottom border-body"
       data-bs-theme="dark"
     >
       <div className="container-fluid">
