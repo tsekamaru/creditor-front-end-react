@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../config";
 import IdsContext from "../../contexts/IdsContext";
+import errorHandler from "../../utils/errorHandler";
+import LoadingError from "../../components/LoadingError";
 
 const CustomersAllTab = () => {
   const [data, setData] = useState([]);
@@ -16,26 +18,13 @@ const CustomersAllTab = () => {
       .get(`${API_URL}/customers`)
       .then((response) => setData(response.data))
       .catch((error) => {
-        console.error("Fetching error: ", error);
+        errorHandler(error);
         setError(true);
       })
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading)
-    return (
-      <div className="text-center mt-5">
-        <div className="spinner-border" role="status"></div>
-        <p>Loading...</p>
-      </div>
-    );
-
-  if (error)
-    return (
-      <div className="text-center mt-5">
-        <p className="text-danger">Error fetching data. Please try again later.</p>
-      </div>
-    );
+  if (loading || error) return <LoadingError loading={loading} error={error} />;
 
   return (
     <div className="container">

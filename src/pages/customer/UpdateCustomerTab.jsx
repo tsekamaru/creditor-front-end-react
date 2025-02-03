@@ -3,26 +3,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { API_URL } from "../../config";
+import errorHandler from "../../utils/errorHandler";
+import LoadingError from "../../components/LoadingError";
+import { regexCreditScore, regexPhoneNumber } from "../../utils/regexPatterns";
 
 const UpdateCustomerTab = () => {
   const { id } = useParams(); // Get customer ID from URL params
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [validated, setValidated] = useState(false); // State to manage form validation
-  const emptyCustomer = {
-    id: null,
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    loanIds: "",
-  };
-  const [customer, setCustomer] = useState(emptyCustomer); // State to manage customer data
+  const [customer, setCustomer] = useState({}); // State to manage customer data
   const formRef = useRef(null); // Reference to form element
   const navigate = useNavigate(); // Navigation hook
-
-  // Regex for positive integers with comma separation for Loan IDs input
-  const regexLoanIDs = /^([1-9]\d*)(,[1-9]\d*)*$/;
-  const regexCustomerId = /^[1-9]\d*$/;
 
   // Fetch customer details when component mounts
   useEffect(() => {
@@ -30,11 +22,11 @@ const UpdateCustomerTab = () => {
       .get(`${API_URL}/customers/${id}`)
       .then((response) => setCustomer(response.data))
       .catch((error) => {
-        console.log("Fetching error: ", error);
+        errorHandler(error);
         setError(true);
       })
       .finally(() => setLoading(false));
-  }, [id, API_URL]);
+  }, [id]);
 
   // Event handler to update customer state
   const handleChange = (e) => {
@@ -49,55 +41,29 @@ const UpdateCustomerTab = () => {
     if (formRef.current.checkValidity()) {
       console.log("Form validated successfully!");
 
-      // Convert string input to array of integers and remove duplicates then save it to customerData object
-      const parseLoanIDs = [...new Set(customer.loanIds.split(",").map(Number))];
-      const customerData = { ...customer, loanIds: parseLoanIDs };
+      const creditScoreNumber = parseFloat(customer.creditScore);
+      const updatedCustomer = { ...customer, creditScore: creditScoreNumber };
+      setLoading(true);
 
       axios
-        .put(`${API_URL}/customers/${customer.id}`, customerData) // Use PUT for updating
+        .put(`${API_URL}/customers/${customer.id}`, updatedCustomer) // Use PUT for updating
         .then((response) => {
           console.log(response.data.message);
           toast.success("Customer updated successfully!"); // Show success toast
-          navigate(-1); // Go back to previous page
+          navigate(`/customers/details/${id}`); // Go back to details tab after updating
         })
         .catch((error) => {
-          console.log(error);
-
-          // Error handling with toasts
-          if (!error.response) {
-            toast.error("Network error. Please check your connection and try again.");
-          } else if (error.response.status === 400) {
-            toast.error("Invalid input. Please check the form and try again.");
-          } else if (error.response.status === 404) {
-            toast.error("Customer not found.");
-          } else if (error.response.status === 500) {
-            toast.error("Server error. Please try again later.");
-          } else {
-            toast.error("Something went wrong. Please try again.");
-          }
-        });
+          errorHandler(error);
+          setError(true);
+        })
+        .finally(() => setLoading(false));
     } else {
       setValidated(true); // Enable Bootstrap validation feedback
       console.log("Form is still invalid!");
     }
   };
 
-  if (loading)
-    return (
-      <div className="text-center mt-5">
-        <div className="spinner-border" role="status"></div>
-        <p>Loading...</p>
-      </div>
-    );
-
-  if (error)
-    return (
-      <div className="text-center mt-5">
-        <p className="text-danger">
-          Error occurred during fetching of data. Please try again later.
-        </p>
-      </div>
-    );
+  if (loading || error) return <LoadingError loading={loading} error={error} />;
 
   return (
     <div className="container mt-5">
@@ -127,7 +93,6 @@ const UpdateCustomerTab = () => {
                 value={customer.id}
                 placeholder=""
                 onChange={handleChange}
-                pattern={regexCustomerId.source}
                 disabled
                 required
               />
@@ -188,26 +153,62 @@ const UpdateCustomerTab = () => {
               <div className="invalid-feedback">Please provide a valid date of birth.</div>
             </div>
 
-            {/* Loan IDs Field with Validation */}
             <div className="form-floating my-2">
               <input
                 className="form-control"
                 type="text"
-                name="loanIds"
-                id="loanIds"
-                value={customer.loanIds}
+                name="creditScore"
+                id="creditScore"
+                value={customer.creditScore}
                 placeholder=""
                 onChange={handleChange}
-                pattern={regexLoanIDs.source}
+                pattern={regexCreditScore.source}
                 required
               />
               <label className="form-label fw-semibold" htmlFor="loanIds">
-                Loan IDs (comma-separated):
+                Credit Score:
               </label>
               <div className="invalid-feedback">
-                Please provide a valid set of loan IDs. <br />
-                Use comma-separated positive integers only (e.g., 1,26,55,128).
+                Please provide a valid credit score. <br />
+                Enter a number between 0 and 5 with up to one decimal place.
               </div>
+            </div>
+
+            <div className="form-floating my-2">
+              <input
+                className="form-control"
+                type="text"
+                name="phoneNumber"
+                id="phoneNumber"
+                value={customer.phoneNumber}
+                placeholder=""
+                onChange={handleChange}
+                pattern={regexPhoneNumber.source}
+                required
+              />
+              <label className="form-label fw-semibold" htmlFor="dateOfBirth">
+                Phone Number:
+              </label>
+              <div className="invalid-feedback">
+                Please provide a valid phone number (8 digits).
+              </div>
+            </div>
+
+            <div className="form-floating my-2">
+              <input
+                className="form-control"
+                type="email"
+                name="email"
+                id="email"
+                value={customer.email}
+                placeholder=""
+                onChange={handleChange}
+                required
+              />
+              <label className="form-label fw-semibold" htmlFor="dateOfBirth">
+                Email:
+              </label>
+              <div className="invalid-feedback">Please provide a valid email.</div>
             </div>
 
             <div className="my-2">

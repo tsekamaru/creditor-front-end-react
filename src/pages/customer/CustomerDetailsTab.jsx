@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../config";
+import errorHandler from "../../utils/errorHandler";
+import LoadingError from "../../components/LoadingError";
 
 const CustomerDetailsTab = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [data, setData] = useState({}); // Ensure "loans" is an empty array to avoid errors
+  const [customer, setCustomer] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -16,36 +18,20 @@ const CustomerDetailsTab = () => {
       .get(`${API_URL}/customers/${id}?_embed=loans`)
       .then((response) => {
         const loansWithRemainingDays = response.data.loans.map((loan) => {
-          const today = new Date();
-          const endDate = new Date(loan.endDate);
-          const timeDiff = endDate - today;
-          const remainingDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+          const timeDiff = new Date(loan.endDate) - new Date(); // Calculate time difference between end date and now
+          const remainingDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
           return { ...loan, remainingDays };
         });
-
-        setData({ ...response.data, loans: loansWithRemainingDays });
+        setCustomer({ ...response.data, loans: loansWithRemainingDays });
       })
       .catch((error) => {
-        console.log("Fetching error: ", error);
+        errorHandler(error);
         setError(true);
       })
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (error)
-    return (
-      <div className="text-center mt-5">
-        <p className="text-danger">There is no item to display ...</p>
-      </div>
-    );
-
-  if (loading)
-    return (
-      <div className="text-center mt-5">
-        <div className="spinner-border" role="status"></div>
-        <p className="">Loading...</p>
-      </div>
-    );
+  if (loading || error) return <LoadingError loading={loading} error={error} />;
 
   return (
     <div className="container mt-5">
@@ -70,26 +56,26 @@ const CustomerDetailsTab = () => {
           <div className="row">
             <div className="col">
               <p>
-                <strong>ID:</strong> {data.id}
+                <strong>ID:</strong> {customer.id}
               </p>
               <p>
-                <strong>Name:</strong> {`${data.firstName} ${data.lastName}`}
+                <strong>Name:</strong> {`${customer.firstName} ${customer.lastName}`}
               </p>
               <p>
                 <strong>Credit Score:</strong> <span className="fs-5">★</span>
-                {data.creditScore}
+                {customer.creditScore}
               </p>
             </div>
             <div className="col">
               <p>
-                <strong>Date of Birth:</strong> {data.dateOfBirth}
+                <strong>Date of Birth:</strong> {customer.dateOfBirth}
               </p>
               <p>
-                <strong>Loans:</strong> {data.loans.length}
+                <strong>Loans:</strong> {customer.loans.length}
               </p>
               <p>
                 <strong>Total Payable amount (incl. Interest):</strong> ₮
-                {data.loans.reduce((acc, loan) => acc + loan.totalPayment, 0).toLocaleString()}
+                {customer.loans.reduce((acc, loan) => acc + loan.totalPayment, 0).toLocaleString()}
               </p>
             </div>
           </div>
@@ -116,7 +102,7 @@ const CustomerDetailsTab = () => {
                 </tr>
               </thead>
               <tbody className="text-center align-middle">
-                {data.loans.map((loan) => (
+                {customer.loans.map((loan) => (
                   <tr key={loan.id}>
                     <td>{loan.id}</td>
                     <td>₮{loan.amount.toLocaleString()}</td>
