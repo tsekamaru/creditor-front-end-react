@@ -1,19 +1,19 @@
 import { Routes, Route } from "react-router-dom";
 import Navtab from "../../components/Navtab";
-import CustomersAllTab from "../customer/CustomersAllTab";
-import CustomerDetailsTab from "../customer/CustomerDetailsTab";
-import AddCustomerTab from "../customer/AddCustomerTab";
-import UpdateCustomerTab from "../customer/UpdateCustomerTab";
+import AllTab from "../customer/AllTab";
+import DetailsTab from "../customer/DetailsTab";
+import AddTab from "../customer/AddTab";
+import UpdateTab from "../customer/UpdateTab";
 
 const CustomersPage = () => {
   return (
     <div>
       <Navtab parentPage={"customers"} />
       <Routes>
-        <Route path="all" element={<CustomersAllTab />} />
-        <Route path="details/:id" element={<CustomerDetailsTab />} />
-        <Route path="add" element={<AddCustomerTab />} />
-        <Route path="update/:id" element={<UpdateCustomerTab />} />
+        <Route path="all" element={<AllTab />} />
+        <Route path="details/:id" element={<DetailsTab />} />
+        <Route path="add" element={<AddTab />} />
+        <Route path="update/:id" element={<UpdateTab />} />
       </Routes>
     </div>
   );

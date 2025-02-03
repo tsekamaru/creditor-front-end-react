@@ -7,7 +7,7 @@ import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 import { regexCreditScore, regexPhoneNumber } from "../../utils/regexPatterns";
 
-const UpdateCustomerTab = () => {
+const UpdateTab = () => {
   const { id } = useParams(); // Get customer ID from URL params
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -221,4 +221,4 @@ const UpdateCustomerTab = () => {
   );
 };
 
-export default UpdateCustomerTab;
+export default UpdateTab;

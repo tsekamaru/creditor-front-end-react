@@ -6,8 +6,8 @@ import IdsContext from "../../contexts/IdsContext";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 
-const CustomersAllTab = () => {
-  const [data, setData] = useState([]);
+const AllTab = () => {
+  const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
@@ -15,8 +15,8 @@ const CustomersAllTab = () => {
 
   useEffect(() => {
     axios
-      .get(`${API_URL}/customers`)
-      .then((response) => setData(response.data))
+      .get(`${API_URL}/loans`)
+      .then((response) => setLoans(response.data))
       .catch((error) => {
         errorHandler(error);
         setError(true);
@@ -28,51 +28,49 @@ const CustomersAllTab = () => {
 
   return (
     <div className="container">
-      <h1 className="text-center mb-4">Customers List</h1>
+      <h1 className="text-center mb-4">Loans List</h1>
       <div className="table-responsive">
         <table className="table table-hover">
           <thead>
             <tr className="table-dark text-center text-center align-middle">
               <th>ID</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th style={{ minWidth: "8rem" }}>Date of Birth</th>
-              <th>Credit Score*</th>
-              <th>Phone Number</th>
-              <th>Email</th>
+              <th>Customer ID</th>
+              <th style={{ minWidth: "8rem" }}>Start Date</th>
+              <th style={{ minWidth: "8rem" }}>End Date</th>
+              <th>Amount</th>
+              <th>Interest</th>
+              <th>Interest Amount</th>
+              <th>Total Payment</th>
+              <th>On Track</th>
             </tr>
           </thead>
           <tbody>
-            {data.map((customer) => (
+            {loans.map((loan) => (
               <tr
-                key={customer.id}
+                key={loan.id}
                 className="bg-light border rounded shadow-sm text-center mt-2"
                 onClick={() => {
-                  navigate(`/customers/details/${customer.id}`);
-                  setIds({ ...ids, customerId: customer.id });
+                  navigate(`/loans/details/${loan.id}`);
+                  setIds({ ...ids, loanId: loan.id });
                 }}
                 style={{ cursor: "pointer" }}
               >
-                <td className="p-3">{customer.id}</td>
-                <td className="p-3">{customer.firstName}</td>
-                <td className="p-3">{customer.lastName}</td>
-                <td className="p-3">{customer.dateOfBirth}</td>
-                <td className="p-3">
-                  <span className="fs-5">★</span>
-                  {customer.creditScore}
-                </td>
-                <td className="p-3">{customer.phoneNumber}</td>
-                <td className="p-3">{customer.email}</td>
+                <td className="p-3">{loan.id}</td>
+                <td className="p-3">{loan.customerId}</td>
+                <td className="p-3">{loan.startDate}</td>
+                <td className="p-3">{loan.endDate}</td>
+                <td className="p-3">₮{loan.amount.toLocaleString()}</td>
+                <td className="p-3">{loan.interest}%</td>
+                <td className="p-3">₮{loan.interestAmount.toLocaleString()}</td>
+                <td className="p-3">₮{loan.totalPayment.toLocaleString()}</td>
+                <td className="p-3">{loan.overdue ? "🚩" : "✅"}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <p className="text-end fw-semibold fs-6">
-          <small>Credit score is out of 5.0*</small>
-        </p>
       </div>
     </div>
   );
 };
 
-export default CustomersAllTab;
+export default AllTab;

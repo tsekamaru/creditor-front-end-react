@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -6,8 +6,9 @@ import { API_URL } from "../../config";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 import { regexCreditScore, regexPhoneNumber } from "../../utils/regexPatterns";
+import IdsContext from "../../contexts/IdsContext";
 
-const AddCustomerTab = () => {
+const AddTab = () => {
   const [validated, setValidated] = useState(false); // State to manage form validation
   const emptyCustomer = {
     firstName: "",
@@ -22,6 +23,7 @@ const AddCustomerTab = () => {
   const [customer, setCustomer] = useState(emptyCustomer); // State to manage customer data
   const formRef = useRef(null); // Reference to form element
   const navigate = useNavigate(); // Navigation hook
+  const { ids, setIds } = useContext(IdsContext);
 
   // Event handler to update customer state
   const handleChange = (e) => {
@@ -46,6 +48,8 @@ const AddCustomerTab = () => {
           console.log(response.data.message);
           toast.success("Customer added successfully!"); // Shows success toast - settings are in App.jsx
           setCustomer(emptyCustomer); // Reset customer state after posting
+          navigate(`/customers/details/${response.data.id}`); // Go back to the previous page
+          setIds({ ...ids, customerId: response.data.id });
         })
         .catch((error) => {
           errorHandler(error);
@@ -198,4 +202,4 @@ const AddCustomerTab = () => {
   );
 };
 
-export default AddCustomerTab;
+export default AddTab;

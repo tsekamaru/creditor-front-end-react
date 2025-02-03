@@ -1,17 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_URL } from "../../config";
+import IdsContext from "../../contexts/IdsContext";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 
-const CustomerDetailsTab = () => {
+const DetailsTab = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [customer, setCustomer] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const { ids, setIds } = useContext(IdsContext);
 
   useEffect(() => {
     axios
@@ -56,19 +58,25 @@ const CustomerDetailsTab = () => {
           <div className="row">
             <div className="col">
               <p>
-                <strong>ID:</strong> {customer.id}
+                <strong>Customer ID:</strong> {customer.id}
               </p>
               <p>
                 <strong>Name:</strong> {`${customer.firstName} ${customer.lastName}`}
               </p>
               <p>
-                <strong>Credit Score:</strong> <span className="fs-5">★</span>
-                {customer.creditScore}
+                <strong>Date of Birth:</strong> {customer.dateOfBirth}
+              </p>
+              <p>
+                <strong>Phone Number:</strong> {customer.phoneNumber}
               </p>
             </div>
             <div className="col">
               <p>
-                <strong>Date of Birth:</strong> {customer.dateOfBirth}
+                <strong>Email address:</strong> {customer.email}
+              </p>
+              <p>
+                <strong>Credit Score:</strong> <span className="fs-5">★</span>
+                {customer.creditScore}
               </p>
               <p>
                 <strong>Loans:</strong> {customer.loans.length}
@@ -87,14 +95,14 @@ const CustomerDetailsTab = () => {
         <div className="card-header bg-dark text-white fw-semibold">Loans</div>
         <div className="card-body">
           <div className="table-responsive">
-            <table className="table table-bordered table-striped">
+            <table className="table table-bordered table-hover">
               <thead className="bg-dark text-white text-center align-middle">
                 <tr>
                   <th>Loan ID</th>
-                  <th>Amount</th>
                   <th style={{ minWidth: "100px" }}>Start Date</th>
                   <th style={{ minWidth: "100px" }}>End Date</th>
                   <th>Interest (%)</th>
+                  <th>Amount</th>
                   <th>Interest Amount</th>
                   <th>Total Payment</th>
                   <th>Remaining Days*</th>
@@ -103,12 +111,19 @@ const CustomerDetailsTab = () => {
               </thead>
               <tbody className="text-center align-middle">
                 {customer.loans.map((loan) => (
-                  <tr key={loan.id}>
+                  <tr
+                    key={loan.id}
+                    onClick={() => {
+                      navigate(`/loans/details/${loan.id}`);
+                      setIds({ ...ids, loanId: loan.id });
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
                     <td>{loan.id}</td>
-                    <td>₮{loan.amount.toLocaleString()}</td>
                     <td>{loan.startDate}</td>
                     <td>{loan.endDate}</td>
                     <td>{loan.interest}%</td>
+                    <td>₮{loan.amount.toLocaleString()}</td>
                     <td>₮{loan.interestAmount.toLocaleString()}</td>
                     <td>₮{loan.totalPayment.toLocaleString()}</td>
                     <td>{loan.remainingDays}</td>
@@ -127,4 +142,4 @@ const CustomerDetailsTab = () => {
   );
 };
 
-export default CustomerDetailsTab;
+export default DetailsTab;
