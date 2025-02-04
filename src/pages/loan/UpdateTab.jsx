@@ -17,7 +17,7 @@ const UpdateTab = () => {
   const formRef = useRef(null); // Reference to form element
   const navigate = useNavigate(); // Navigation hook
 
-  // Fetch customer details when component mounts
+  // Fetch loan details when component mounts
   useEffect(() => {
     axios
       .get(`${API_URL}/loans/${id}`)
@@ -90,12 +90,13 @@ const UpdateTab = () => {
       setLoading(true);
       setValidated(false);
 
+      // Use PUT for updating
       axios
-        .put(`${API_URL}/loans/${loan.id}`, loan) // Use PUT for updating
+        .put(`${API_URL}/loans/${loan.id}`, loan)
         .then((response) => {
           console.log(response.data.message);
-          toast.success("Loan updated successfully!"); // Show success toast
-          navigate(`/loans/details/${id}`); // Go back to details tab after updating
+          toast.success("Loan updated successfully!");
+          navigate(`/loans/details/${id}`);
         })
         .catch((error) => {
           errorHandler(error);

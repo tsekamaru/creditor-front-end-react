@@ -24,7 +24,7 @@ function App() {
       {/* Global Toast Container (Always Available) */}
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={4000}
         hideProgressBar={true}
         closeOnClick={true}
         theme="colored"

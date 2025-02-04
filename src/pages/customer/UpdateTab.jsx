@@ -45,8 +45,9 @@ const UpdateTab = () => {
       const updatedCustomer = { ...customer, creditScore: creditScoreNumber };
       setLoading(true);
 
+      // Use PUT for updating
       axios
-        .put(`${API_URL}/customers/${customer.id}`, updatedCustomer) // Use PUT for updating
+        .put(`${API_URL}/customers/${customer.id}`, updatedCustomer)
         .then((response) => {
           console.log(response.data.message);
           toast.success("Customer updated successfully!"); // Show success toast

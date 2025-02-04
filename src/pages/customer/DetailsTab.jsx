@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { API_URL } from "../../config";
 import IdsContext from "../../contexts/IdsContext";
 import errorHandler from "../../utils/errorHandler";
@@ -13,7 +14,7 @@ const DetailsTab = () => {
   const [customer, setCustomer] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const { ids, setIds } = useContext(IdsContext);
+  const { ids, setIds, refreshIds } = useContext(IdsContext);
 
   useEffect(() => {
     axios
@@ -32,6 +33,20 @@ const DetailsTab = () => {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  const deleteHandler = () => {
+    axios
+      .delete(`${API_URL}/customers/${id}`)
+      .then(() => {
+        console.log("Customer deleted successfully.");
+        toast.info("Customer deleted successfully!");
+        refreshIds();
+        navigate("/customers/all");
+      })
+      .catch((error) => {
+        errorHandler(error);
+      });
+  };
 
   if (loading || error) return <LoadingError loading={loading} error={error} />;
 
@@ -135,6 +150,59 @@ const DetailsTab = () => {
             <p className="text-end fw-semibold">
               <small>Negative amounts indicate the number of overdue days*</small>
             </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="d-flex justify-content-end mt-3">
+        {/* <!-- Button trigger modal --> */}
+        <button
+          type="button"
+          className="btn btn-outline-danger fw-semibold"
+          data-bs-toggle="modal"
+          data-bs-target="#deleteModal"
+        >
+          <i className="bi bi-trash"></i> Delete
+        </button>
+        {/* <!-- Modal --> */}
+        <div
+          className="modal fade"
+          id="deleteModal"
+          tabIndex="-1"
+          aria-labelledby="deleteModalLabel"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5" id="deleteModalLabel">
+                  Are you sure?
+                </h1>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                Deleting will permanently remove this element from the system. This cannot be
+                undone!
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-dark" data-bs-dismiss="modal">
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  data-bs-dismiss="modal"
+                  onClick={deleteHandler}
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

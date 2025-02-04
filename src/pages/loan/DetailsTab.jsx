@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
 import { API_URL } from "../../config";
 import IdsContext from "../../contexts/IdsContext";
 import errorHandler from "../../utils/errorHandler";
@@ -9,7 +10,7 @@ import LoadingError from "../../components/LoadingError";
 const DetailsTab = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { ids, setIds } = useContext(IdsContext);
+  const { ids, setIds, refreshIds } = useContext(IdsContext);
   const [customer, setCustomer] = useState({});
   const [loan, setLoan] = useState({});
   const [loading, setLoading] = useState(true);
@@ -41,6 +42,20 @@ const DetailsTab = () => {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  const deleteHandler = () => {
+    axios
+      .delete(`${API_URL}/loans/${id}`)
+      .then(() => {
+        console.log("Loan deleted successfully.");
+        toast.info("Loan deleted successfully!");
+        refreshIds();
+        navigate("/loans/all");
+      })
+      .catch((error) => {
+        errorHandler(error);
+      });
+  };
 
   if (loading || error) return <LoadingError loading={loading} error={error} />;
 
@@ -139,6 +154,58 @@ const DetailsTab = () => {
                 <strong>Total Payable amount (incl. Interest):</strong> ₮
                 {customer.loans.reduce((acc, loan) => acc + loan.totalPayment, 0).toLocaleString()}
               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="d-flex justify-content-end mt-3">
+        {/* <!-- Button trigger modal --> */}
+        <button
+          type="button"
+          className="btn btn-outline-danger fw-semibold"
+          data-bs-toggle="modal"
+          data-bs-target="#deleteModal"
+        >
+          <i className="bi bi-trash"></i> Delete
+        </button>
+        {/* <!-- Modal --> */}
+        <div
+          className="modal fade"
+          id="deleteModal"
+          tabIndex="-1"
+          aria-labelledby="deleteModalLabel"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h1 className="modal-title fs-5" id="deleteModalLabel">
+                  Are you sure?
+                </h1>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                Deleting will permanently remove this element from the system. This cannot be
+                undone!
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-dark" data-bs-dismiss="modal">
+                  Close
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  data-bs-dismiss="modal"
+                  onClick={deleteHandler}
+                >
+                  Yes, Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>
