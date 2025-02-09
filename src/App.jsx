@@ -8,6 +8,7 @@ import CustomersPage from "./pages/main/CustomersPage";
 import LoansPage from "./pages/main/LoansPage";
 import AboutPage from "./pages/main/AboutPage";
 import ErrorPage from "./pages/main/ErrorPage";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         newestOnTop={true}
         pauseOnFocusLoss={false}
       />
+      <Footer />
     </div>
   );
 }
