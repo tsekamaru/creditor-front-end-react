@@ -139,7 +139,7 @@ const UpdateTab = () => {
 
             <div className="form-floating my-2">
               <input
-                className="form-control"
+                className="form-control text-start"
                 type="date"
                 name="dateOfBirth"
                 id="dateOfBirth"

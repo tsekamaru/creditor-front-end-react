@@ -167,7 +167,7 @@ const UpdateTab = () => {
               <div className="invalid-feedback">The Customer with this ID does not exist</div>
             </div>
 
-            <div className="form-floating my-2">
+            <div className="form-floating text-start my-2">
               <input
                 className="form-control"
                 type="date"
@@ -186,7 +186,7 @@ const UpdateTab = () => {
 
             <div className="form-floating my-2">
               <input
-                className="form-control"
+                className="form-control text-start"
                 type="date"
                 name="endDate"
                 id="endDate"
