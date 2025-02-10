@@ -1,30 +1,54 @@
 import { useState } from "react";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+
+import { auth, db } from "../firebase";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  async function registerUser(email, password) {
+    try {
+      // Step 1: Create user in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-  const handleFormSubmit = (e, actionType) => {
-    e.preventDefault();
+      // Step 2: Save user data to Firestore (with uid as document ID)
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        createdAt: serverTimestamp(), // Firestore server timestamp
+      });
 
-    if (actionType === "login") {
-      console.log("Logging in with:", email, password);
-      // Add login logic here (API call, validation, etc.)
-    } else if (actionType === "signup") {
-      console.log("Signing up with:", email, password);
-      // Add sign-up logic here
+      console.log("User registered and saved to Firestore:", user.uid);
+      return user.uid;
+    } catch (error) {
+      console.error("Error registering user:", error.message);
     }
-  };
+  }
+
+  async function loginUser(email, password) {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log("User signed in:", userCredential.user);
+      alert("Login successful!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error signing in:", error.message);
+      alert(error.message);
+    }
+  }
 
   return (
-    <form className="d-flex flex-column mt-2" onSubmit={handleFormSubmit}>
+    <form className="d-flex flex-column mt-2">
       <div className="form-floating mb-2">
         <input
           className="form-control"
-          type="text"
+          type="email"
           name="email"
           id="email"
-          value={email ?? ""}
+          value={email}
           placeholder=""
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -40,7 +64,7 @@ const LoginForm = () => {
           type="password"
           name="password"
           id="password"
-          value={password ?? ""}
+          value={password}
           placeholder=""
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -50,10 +74,25 @@ const LoginForm = () => {
         </label>
       </div>
 
-      <button className="btn btn-dark d-block mb-2" onClick={(e) => handleFormSubmit(e, "login")}>
+      <button
+        type="button"
+        className="btn btn-dark d-block mb-2"
+        onClick={(e) => {
+          e.preventDefault();
+          loginUser(email, password);
+        }}
+      >
         Login
       </button>
-      <button className="btn btn-danger d-block" onClick={(e) => handleFormSubmit(e, "signup")}>
+
+      <button
+        type="button"
+        className="btn btn-danger d-block"
+        onClick={(e) => {
+          e.preventDefault();
+          registerUser(email, password);
+        }}
+      >
         Sign up
       </button>
     </form>
