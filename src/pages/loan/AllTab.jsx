@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { API_URL } from "../../config";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
 import IdsContext from "../../contexts/IdsContext";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
@@ -14,9 +14,14 @@ const AllTab = () => {
   const { ids, setIds } = useContext(IdsContext);
 
   useEffect(() => {
-    axios
-      .get(`${API_URL}/loans`)
-      .then((response) => setLoans(response.data))
+    getDocs(collection(db, "loans"))
+      .then((querySnapshot) => {
+        const loanList = querySnapshot.docs.map((doc) => ({
+          id: doc.id, // Include document ID
+          ...doc.data(), // Include all loan fields
+        }));
+        setLoans(loanList); // Update state
+      })
       .catch((error) => {
         errorHandler(error);
         setError(true);

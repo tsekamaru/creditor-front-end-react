@@ -1,48 +1,64 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { API_URL } from "../../config";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 import { regexId } from "../../utils/regexPatterns";
 
 const UpdateTab = () => {
-  const { id } = useParams(); // Get customer ID from URL params
+  const { loanId } = useParams(); // Get customer ID from URL params
   const [validated, setValidated] = useState(false); // State to manage form validation
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [loan, setLoan] = useState({}); // State to manage loan data
   const [customerIdValid, setCustomerIdValid] = useState(false); // State to manage customer ID validation
   const formRef = useRef(null); // Reference to form element
   const navigate = useNavigate(); // Navigation hook
 
-  // Fetch loan details when component mounts
+  // Fetch customer details when component mounts
+  const getLoan = async (loanId) => {
+    try {
+      const docRef = doc(db, "loans", loanId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setLoan({ id: docSnap.id, ...docSnap.data() });
+      } else {
+        console.log("No such loan!");
+      }
+    } catch (error) {
+      console.error("Error fetching loan:", error);
+      errorHandler(error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    axios
-      .get(`${API_URL}/loans/${id}`)
-      .then((response) => setLoan(response.data))
-      .catch((error) => {
-        errorHandler(error);
-        setError(true);
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
+    getLoan(loanId);
+  }, [loanId]);
 
   // Validate customer ID
+  const checkCustomer = async (customerId) => {
+    if (!customerId) return; // ✅ Prevents running with undefined ID
+
+    try {
+      const docRef = doc(db, "customers", customerId);
+      const docSnap = await getDoc(docRef);
+
+      setCustomerIdValid(docSnap.exists());
+    } catch (error) {
+      console.error("Error fetching customer:", error);
+      errorHandler(error);
+      setError(true);
+    }
+  };
+
   useEffect(() => {
-    axios
-      .get(`${API_URL}/customers`)
-      .then((response) =>
-        response.data.map((customer) => customer.id).includes(loan.customerId)
-          ? setCustomerIdValid(true)
-          : setCustomerIdValid(false)
-      )
-      .catch((error) => {
-        errorHandler(error);
-        setError(true);
-      })
-      .finally(() => setLoading(false));
+    if (loan.customerId) checkCustomer(loan.customerId);
   }, [loan.customerId]);
 
   // Event handler to update loan state
@@ -52,7 +68,7 @@ const UpdateTab = () => {
       const updatedLoan = { ...prevLoan, [name]: value };
 
       // Convert numeric fields to numbers
-      if (["id", "customerId", "amount", "interest"].includes(name)) {
+      if (["amount", "interest"].includes(name)) {
         updatedLoan[name] = parseFloat(value) || null;
       }
 
@@ -81,28 +97,34 @@ const UpdateTab = () => {
     });
   };
 
+  // Use PUT for updating
+  const updateLoan = async (loanId, updatedFields) => {
+    try {
+      const loanRef = doc(db, "loans", loanId);
+      await updateDoc(loanRef, updatedFields);
+      console.log("Loan updated successfully!");
+      toast.success("Loan updated successfully!"); // Show success toast
+      navigate(`/loans/details/${loanId}`); // Go back to details tab after updating
+    } catch (error) {
+      console.error("Error updating loan:", error);
+      errorHandler(error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Event handler to submit form data
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    if (formRef.current.checkValidity()) {
+    if (formRef.current && formRef.current.checkValidity()) {
       console.log("Form validated successfully!");
       setLoading(true);
       setValidated(false);
 
       // Use PUT for updating
-      axios
-        .put(`${API_URL}/loans/${loan.id}`, loan)
-        .then((response) => {
-          console.log(response.data.message);
-          toast.success("Loan updated successfully!");
-          navigate(`/loans/details/${id}`);
-        })
-        .catch((error) => {
-          errorHandler(error);
-          setError(true);
-        })
-        .finally(() => setLoading(false));
+      updateLoan(loan.id, loan);
     } else {
       setValidated(true); // Enable Bootstrap validation feedback
       console.log("Form is still invalid!");
@@ -118,7 +140,7 @@ const UpdateTab = () => {
         <i className="bi bi-arrow-left"></i> Go Back
       </button>
 
-      {/* Add Loan Form */}
+      {/* Update Loan Form */}
       <div className="card shadow-sm">
         <div className="card-header bg-dark text-white fw-semibold">Add Loan</div>
         <div className="card-body">
@@ -152,7 +174,7 @@ const UpdateTab = () => {
                 className={`form-control ${
                   validated && (customerIdValid ? "is-valid" : "is-invalid")
                 }`}
-                type="number"
+                type="text"
                 name="customerId"
                 id="customerId"
                 value={loan.customerId ?? ""}

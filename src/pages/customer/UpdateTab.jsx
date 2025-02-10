@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { API_URL } from "../../config";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 import { regexCreditScore, regexPhoneNumber } from "../../utils/regexPatterns";
 
 const UpdateTab = () => {
-  const { id } = useParams(); // Get customer ID from URL params
+  const { customerId } = useParams(); // Get customer ID from URL params
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [validated, setValidated] = useState(false); // State to manage form validation
@@ -17,16 +17,28 @@ const UpdateTab = () => {
   const navigate = useNavigate(); // Navigation hook
 
   // Fetch customer details when component mounts
+  const getCustomer = async (customerId) => {
+    try {
+      const docRef = doc(db, "customers", customerId);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setCustomer({ id: docSnap.id, ...docSnap.data() });
+      } else {
+        console.log("No such customer!");
+      }
+    } catch (error) {
+      console.error("Error fetching customer:", error);
+      errorHandler(error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    axios
-      .get(`${API_URL}/customers/${id}`)
-      .then((response) => setCustomer(response.data))
-      .catch((error) => {
-        errorHandler(error);
-        setError(true);
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
+    getCustomer(customerId);
+  }, [customerId]);
 
   // Event handler to update customer state
   const handleChange = (e) => {
@@ -34,30 +46,34 @@ const UpdateTab = () => {
     setCustomer({ ...customer, [name]: value });
   };
 
+  // Use PUT for updating
+  const updateCustomer = async (customerId, updatedFields) => {
+    try {
+      const customerRef = doc(db, "customers", customerId);
+      await updateDoc(customerRef, updatedFields);
+      console.log("Customer updated successfully!");
+      toast.success("Customer updated successfully!"); // Show success toast
+      navigate(`/customers/details/${customerId}`); // Go back to details tab after updating
+    } catch (error) {
+      console.error("Error updating customer:", error);
+      errorHandler(error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Event handler to submit form data
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    if (formRef.current.checkValidity()) {
+    if (formRef.current && formRef.current.checkValidity()) {
       console.log("Form validated successfully!");
 
       const creditScoreNumber = parseFloat(customer.creditScore);
       const updatedCustomer = { ...customer, creditScore: creditScoreNumber };
       setLoading(true);
-
-      // Use PUT for updating
-      axios
-        .put(`${API_URL}/customers/${customer.id}`, updatedCustomer)
-        .then((response) => {
-          console.log(response.data.message);
-          toast.success("Customer updated successfully!"); // Show success toast
-          navigate(`/customers/details/${id}`); // Go back to details tab after updating
-        })
-        .catch((error) => {
-          errorHandler(error);
-          setError(true);
-        })
-        .finally(() => setLoading(false));
+      updateCustomer(updatedCustomer.id, updatedCustomer);
     } else {
       setValidated(true); // Enable Bootstrap validation feedback
       console.log("Form is still invalid!");
@@ -88,7 +104,7 @@ const UpdateTab = () => {
             <div className="form-floating mb-2">
               <input
                 className="form-control"
-                type="number"
+                type="text"
                 name="id"
                 id="id"
                 value={customer.id}

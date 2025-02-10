@@ -1,61 +1,74 @@
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 import { toast } from "react-toastify";
-import { API_URL } from "../../config";
 import IdsContext from "../../contexts/IdsContext";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 
 const DetailsTab = () => {
-  const { id } = useParams();
+  const { loanId } = useParams();
   const navigate = useNavigate();
-  const { ids, setIds, refreshIds } = useContext(IdsContext);
+
   const [customer, setCustomer] = useState({});
   const [loan, setLoan] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const { ids, setIds, refreshIds } = useContext(IdsContext);
 
   useEffect(() => {
-    // API requests
-    const fetchLoan = axios.get(`${API_URL}/loans/${id}`);
-    const fetchCustomer = fetchLoan.then((loanResponse) => {
-      const loanData = loanResponse.data;
-      return axios.get(`${API_URL}/customers/${loanData.customerId}?_embed=loans`);
-    });
+    const fetchLoanAndCustomer = async () => {
+      try {
+        // 🔹 Step 1: Fetch the loan document
+        const loanRef = doc(db, "loans", loanId);
+        const loanSnap = await getDoc(loanRef);
 
-    Promise.all([fetchLoan, fetchCustomer])
-      .then(([loanResponse, customerResponse]) => {
-        const loanData = loanResponse.data;
-        const customerData = customerResponse.data;
+        if (!loanSnap.exists()) {
+          setError("Loan not found");
+          setLoading(false);
+          return;
+        }
+
+        const loanData = { id: loanSnap.id, ...loanSnap.data() };
 
         // Calculate remaining days
         const timeDiff = new Date(loanData.endDate) - new Date();
         const remainingDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
-        setLoan({ ...loanData, remainingDays });
-        setCustomer(customerData);
-      })
-      .catch((error) => {
+        setLoan({ ...loanData, remainingDays }); // Store loan data
+
+        // 🔹 Step 2: Fetch corresponding customer using loan.customerId
+        const customerRef = doc(db, "customers", loanData.customerId);
+        const customerSnap = await getDoc(customerRef);
+
+        if (customerSnap.exists()) {
+          setCustomer({ id: customerSnap.id, ...customerSnap.data() });
+        } else {
+          setError("Customer not found");
+        }
+      } catch (error) {
         errorHandler(error);
         setError(true);
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const deleteHandler = () => {
-    axios
-      .delete(`${API_URL}/loans/${id}`)
-      .then(() => {
-        console.log("Loan deleted successfully.");
-        toast.info("Loan deleted successfully!");
-        refreshIds();
-        navigate("/loans/all");
-      })
-      .catch((error) => {
-        errorHandler(error);
-      });
-  };
+    if (loanId) fetchLoanAndCustomer();
+  }, [loanId]);
+
+  async function deleteHandler(loanId) {
+    try {
+      await deleteDoc(doc(db, "loans", loanId));
+      console.log("Loan deleted successfully.");
+      toast.info("Loan deleted successfully!");
+      refreshIds();
+      navigate("/loans/all");
+    } catch (error) {
+      errorHandler(error);
+    }
+  }
 
   if (loading || error) return <LoadingError loading={loading} error={error} />;
 
@@ -69,7 +82,7 @@ const DetailsTab = () => {
 
         <button
           className="btn btn-secondary mb-3 fw-semibold"
-          onClick={() => navigate(`/customers/update/${id}`)}
+          onClick={() => navigate(`/loans/update/${loanId}`)}
         >
           <i className="bi bi-pencil-square"></i> Update
         </button>
@@ -138,21 +151,14 @@ const DetailsTab = () => {
               <p>
                 <strong>Name:</strong> {`${customer.firstName} ${customer.lastName}`}
               </p>
+            </div>
+            <div className="col">
               <p>
                 <strong>Credit Score:</strong> <span className="fs-5">★</span>
                 {customer.creditScore}
               </p>
-            </div>
-            <div className="col">
               <p>
                 <strong>Date of Birth:</strong> {customer.dateOfBirth}
-              </p>
-              <p>
-                <strong>Loans:</strong> {customer.loans.length}
-              </p>
-              <p>
-                <strong>Total Payable amount (incl. Interest):</strong> ₮
-                {customer.loans.reduce((acc, loan) => acc + loan.totalPayment, 0).toLocaleString()}
               </p>
             </div>
           </div>
@@ -201,7 +207,7 @@ const DetailsTab = () => {
                   type="button"
                   className="btn btn-danger"
                   data-bs-dismiss="modal"
-                  onClick={deleteHandler}
+                  onClick={() => deleteHandler(loanId)}
                 >
                   Yes, Delete
                 </button>

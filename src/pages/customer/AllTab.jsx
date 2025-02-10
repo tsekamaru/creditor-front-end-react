@@ -1,22 +1,27 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { API_URL } from "../../config";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
 import IdsContext from "../../contexts/IdsContext";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 
 const AllTab = () => {
-  const [data, setData] = useState([]);
+  const [customers, setCustomers] = useState([]); // Stores fetched customers
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
   const { ids, setIds } = useContext(IdsContext);
 
   useEffect(() => {
-    axios
-      .get(`${API_URL}/customers`)
-      .then((response) => setData(response.data))
+    getDocs(collection(db, "customers"))
+      .then((querySnapshot) => {
+        const customerList = querySnapshot.docs.map((doc) => ({
+          id: doc.id, // Include document ID
+          ...doc.data(), // Include all customer fields
+        }));
+        setCustomers(customerList); // Update state
+      })
       .catch((error) => {
         errorHandler(error);
         setError(true);
@@ -43,7 +48,7 @@ const AllTab = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((customer) => (
+            {customers.map((customer) => (
               <tr
                 key={customer.id}
                 className="bg-light border rounded shadow-sm text-center mt-2"

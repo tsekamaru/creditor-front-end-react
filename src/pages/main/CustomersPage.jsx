@@ -11,9 +11,9 @@ const CustomersPage = () => {
       <Navtab parentPage={"customers"} />
       <Routes>
         <Route path="all" element={<AllTab />} />
-        <Route path="details/:id" element={<DetailsTab />} />
+        <Route path="details/:customerId" element={<DetailsTab />} />
         <Route path="add" element={<AddTab />} />
-        <Route path="update/:id" element={<UpdateTab />} />
+        <Route path="update/:customerId" element={<UpdateTab />} />
       </Routes>
     </div>
   );

@@ -1,8 +1,8 @@
 import { useState, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { API_URL } from "../../config";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 import { regexCreditScore, regexPhoneNumber } from "../../utils/regexPatterns";
@@ -31,6 +31,24 @@ const AddTab = () => {
     setCustomer({ ...customer, [name]: value });
   };
 
+  // add customer function
+  const addCustomer = async (customerData) => {
+    try {
+      const docRef = await addDoc(collection(db, "customers"), customerData);
+      console.log("Customer added with ID:", docRef.id);
+      toast.success("Customer added successfully!"); // Shows success toast - settings are in App.jsx
+      setCustomer(emptyCustomer); // Reset customer state after posting
+      navigate(`/customers/details/${docRef.id}`); // Go back to the previous page
+      setIds({ ...ids, customerId: docRef.id });
+    } catch (error) {
+      console.error("Error adding customer:", error);
+      errorHandler(error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Event handler to submit form data
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -42,20 +60,7 @@ const AddTab = () => {
       const updatedCustomer = { ...customer, creditScore: creditScoreNumber };
       setLoading(true);
 
-      axios
-        .post(`${API_URL}/customers`, updatedCustomer)
-        .then((response) => {
-          console.log(response.data.message);
-          toast.success("Customer added successfully!"); // Shows success toast - settings are in App.jsx
-          setCustomer(emptyCustomer); // Reset customer state after posting
-          navigate(`/customers/details/${response.data.id}`); // Go back to the previous page
-          setIds({ ...ids, customerId: response.data.id });
-        })
-        .catch((error) => {
-          errorHandler(error);
-          setError(true);
-        })
-        .finally(() => setLoading(false));
+      addCustomer(updatedCustomer);
     } else {
       setValidated(true); // Enable Bootstrap validation feedback
       console.log("Form is still invalid!");

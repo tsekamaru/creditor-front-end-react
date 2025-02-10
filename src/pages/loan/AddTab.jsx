@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
-import { API_URL } from "../../config";
+import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
 import { regexId } from "../../utils/regexPatterns";
@@ -11,7 +11,6 @@ import IdsContext from "../../contexts/IdsContext";
 const AddTab = () => {
   const [validated, setValidated] = useState(false); // State to manage form validation
   const emptyLoan = {
-    id: "",
     customerId: "",
     amount: "",
     startDate: "",
@@ -29,22 +28,6 @@ const AddTab = () => {
   const navigate = useNavigate(); // Navigation hook
   const { ids, setIds } = useContext(IdsContext);
 
-  // Validate customer ID
-  useEffect(() => {
-    axios
-      .get(`${API_URL}/customers`)
-      .then((response) =>
-        response.data.map((customer) => customer.id).includes(loan.customerId)
-          ? setCustomerIdValid(true)
-          : setCustomerIdValid(false)
-      )
-      .catch((error) => {
-        errorHandler(error);
-        setError(true);
-      })
-      .finally(() => setLoading(false));
-  }, [loan.customerId]);
-
   // Event handler to update loan state
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -52,7 +35,7 @@ const AddTab = () => {
       const updatedLoan = { ...prevLoan, [name]: value };
 
       // Convert numeric fields to numbers
-      if (["id", "customerId", "amount", "interest"].includes(name)) {
+      if (["amount", "interest"].includes(name)) {
         updatedLoan[name] = parseFloat(value) || null;
       }
 
@@ -81,6 +64,44 @@ const AddTab = () => {
     });
   };
 
+  // Validate customer ID
+  const checkCustomer = async (customerId) => {
+    if (!customerId) return; // ✅ Prevents running with undefined ID
+
+    try {
+      const docRef = doc(db, "customers", customerId);
+      const docSnap = await getDoc(docRef);
+
+      setCustomerIdValid(docSnap.exists());
+    } catch (error) {
+      console.error("Error fetching customer:", error);
+      errorHandler(error);
+      setError(true);
+    }
+  };
+
+  useEffect(() => {
+    checkCustomer(loan.customerId);
+  }, [loan.customerId]);
+
+  // add customer function
+  const addLoan = async (loanData) => {
+    try {
+      const docRef = await addDoc(collection(db, "loans"), loanData);
+      console.log("Loan added with ID:", docRef.id);
+      toast.success("Loan added successfully!");
+      setLoan(emptyLoan);
+      navigate(`/loans/details/${docRef.id}`);
+      setIds({ ...ids, loanId: docRef.id });
+    } catch (error) {
+      console.error("Error adding loan:", error);
+      errorHandler(error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Event handler to submit form data
   const handleFormSubmit = (e) => {
     e.preventDefault();
@@ -89,21 +110,7 @@ const AddTab = () => {
       console.log("Form validated successfully!");
       setLoading(true);
       setValidated(false);
-
-      axios
-        .post(`${API_URL}/loans`, loan)
-        .then((response) => {
-          console.log(response.data.message);
-          toast.success("Loan added successfully!"); // Shows success toast - settings are in App.jsx
-          setLoan(emptyLoan); // Reset loan state after posting
-          navigate(`/loans/details/${response.data.id}`); // Go back to the previous page
-          setIds({ ...ids, loanId: response.data.id });
-        })
-        .catch((error) => {
-          errorHandler(error);
-          setError(true);
-        })
-        .finally(() => setLoading(false));
+      addLoan(loan);
     } else {
       setValidated(true); // Enable Bootstrap validation feedback
       console.log("Form is still invalid!");
@@ -136,7 +143,7 @@ const AddTab = () => {
                 className={`form-control ${
                   validated && (customerIdValid ? "is-valid" : "is-invalid")
                 }`}
-                type="number"
+                type="text"
                 name="customerId"
                 id="customerId"
                 value={loan.customerId ?? ""}
