@@ -1,5 +1,9 @@
 import ReactLogo from "../../assets/react-router-svgrepo-com.svg";
 import LoginForm from "../../components/LoginForm";
+import PhoneAuth from "../../components/PhoneAuth";
+import Accordion from "../../components/Accordion";
+import GitHubLogin from "../../components/githubLogin";
+import GoogleLogin from "../../components/googleLogin";
 
 const LoginPage = () => {
   return (
@@ -15,8 +19,14 @@ const LoginPage = () => {
               a tap.
             </p>
           </div>
+          <h2 className="mb-4 ms-4">Login & Sign up below!</h2>
           <div className="w-75">
-            <LoginForm />
+            <Accordion
+              authMethod1={<LoginForm />}
+              authMethod2={<PhoneAuth />}
+              authMethod3={<GitHubLogin />}
+              authMethod4={<GoogleLogin />}
+            />
           </div>
         </div>
         <div className="col-sm-5 d-flex justify-content-center align-items-center">

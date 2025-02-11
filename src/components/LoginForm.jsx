@@ -25,8 +25,8 @@ const LoginForm = () => {
       });
 
       console.log("User registered and saved to Firestore:", user.uid);
-      toast("🎈Now you can login!");
-      toast("🎉Signed up successfully!");
+      toast.success("🎈Now you can login!");
+      toast.success("🎉Signed up successfully!");
       return user.uid;
     } catch (error) {
       console.error("Error registering user:", error.message);
@@ -38,9 +38,9 @@ const LoginForm = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in:", userCredential.user);
-      toast("🦄 Logged in successfully!");
-      refreshIds();
+      toast.success("🦄 Logged in successfully!");
       navigate("/");
+      refreshIds();
     } catch (error) {
       console.error("Error signing in:", error.message);
       toast.error(`Cannot login! ${error.message}`);
