@@ -3,7 +3,7 @@ import LoginForm from "../../components/LoginForm";
 
 const LoginPage = () => {
   return (
-    <div className="container mt-2" id="LoginPage">
+    <div className="container mt-2 mb-5" id="LoginPage">
       <div className="row">
         <div className="col-sm-7">
           <h1 className="mb-3 fw-bold" style={{ fontSize: "3rem" }}>
@@ -24,7 +24,7 @@ const LoginPage = () => {
             <img
               className="img-fluid"
               src={ReactLogo}
-              alt=""
+              alt="..."
               style={{ objectFit: "cover", width: "20rem" }}
             />
             <div className="card-img-overlay">

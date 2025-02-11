@@ -14,7 +14,7 @@ import VsCodeLogo from "../../assets/vscode-svgrepo-com.svg";
 
 function AboutPage() {
   return (
-    <div className="container mt-2">
+    <div className="container mt-2 mb-5">
       <h1>About Me</h1>
       <p>
         Hi, I’m Tseka—a junior developer on a mission to master the back-end while crafting my way

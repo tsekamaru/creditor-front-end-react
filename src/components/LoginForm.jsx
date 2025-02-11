@@ -2,6 +2,7 @@ import { useState } from "react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import { auth, db } from "../firebase";
 
@@ -9,6 +10,7 @@ const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
   async function registerUser(email, password) {
     try {
       // Step 1: Create user in Firebase Authentication
@@ -22,9 +24,12 @@ const LoginForm = () => {
       });
 
       console.log("User registered and saved to Firestore:", user.uid);
+      toast("🎈Now you can login!");
+      toast("🎉Signed up successfully!");
       return user.uid;
     } catch (error) {
       console.error("Error registering user:", error.message);
+      toast.error(`Cannot sign up! ${error.message}`);
     }
   }
 
@@ -32,11 +37,11 @@ const LoginForm = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in:", userCredential.user);
-      alert("Login successful!");
+      toast("🦄 Logged in successfully!");
       navigate("/");
     } catch (error) {
       console.error("Error signing in:", error.message);
-      alert(error.message);
+      toast.error(`Cannot login! ${error.message}`);
     }
   }
 
@@ -76,7 +81,7 @@ const LoginForm = () => {
 
       <button
         type="button"
-        className="btn btn-dark d-block mb-2"
+        className="btn btn-dark d-block mb-2 fw-medium"
         onClick={(e) => {
           e.preventDefault();
           loginUser(email, password);
@@ -87,7 +92,7 @@ const LoginForm = () => {
 
       <button
         type="button"
-        className="btn btn-danger d-block"
+        className="btn btn-danger d-block fw-medium"
         onClick={(e) => {
           e.preventDefault();
           registerUser(email, password);

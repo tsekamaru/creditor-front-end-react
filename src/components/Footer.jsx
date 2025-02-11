@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="text-center mt-5 bg-dark text-light p-3">
+    <footer className="text-center bg-dark text-light p-3">
       <p>&copy; {new Date().getFullYear()} Creditor. All rights reserved.</p>
       <div className="fs-4">
         <a href="https://www.facebook.com" className="me-2">

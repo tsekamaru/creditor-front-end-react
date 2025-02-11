@@ -7,7 +7,7 @@ import UpdateTab from "../loan/UpdateTab";
 
 const LoansPage = () => {
   return (
-    <div>
+    <div className="mb-5">
       <Navtab parentPage={"loans"} />
       <Routes>
         <Route path="all" element={<AllTab />} />

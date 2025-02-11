@@ -7,7 +7,7 @@ import UpdateTab from "../customer/UpdateTab";
 
 const CustomersPage = () => {
   return (
-    <div>
+    <div className="mb-5">
       <Navtab parentPage={"customers"} />
       <Routes>
         <Route path="all" element={<AllTab />} />
