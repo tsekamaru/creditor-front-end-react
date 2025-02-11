@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-
 import { auth, db } from "../firebase";
+import IdsContext from "../contexts/IdsContext";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { refreshIds } = useContext(IdsContext);
 
   async function registerUser(email, password) {
     try {
@@ -38,6 +39,7 @@ const LoginForm = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log("User signed in:", userCredential.user);
       toast("🦄 Logged in successfully!");
+      refreshIds();
       navigate("/");
     } catch (error) {
       console.error("Error signing in:", error.message);

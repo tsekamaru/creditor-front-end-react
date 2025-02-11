@@ -2,7 +2,6 @@ import { createContext, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
-import errorHandler from "../utils/errorHandler";
 
 // Create Context
 const IdsContext = createContext();
@@ -27,7 +26,7 @@ export const IdsProvider = ({ children }) => {
         };
       }
     } catch (error) {
-      errorHandler(error);
+      console.error("Error fetching IDs:", error.message);
     }
   };
 
