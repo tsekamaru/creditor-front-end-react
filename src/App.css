@@ -3,3 +3,21 @@
   color: var(--bs-dark); /* Dark text for contrast */
   transition: background-color 0.3s ease;
 }
+
+/* ✅ Fix Bootstrap issues affecting Google Maps */
+.gm-style img {
+  max-width: none !important;
+  background: none !important;
+}
+
+.gm-style div {
+  box-sizing: content-box !important; /* ✅ Fix for Bootstrap overriding Google Maps styles */
+}
+
+.gm-style .gm-ui-hover-effect {
+  display: block !important; /* ✅ Ensures UI elements are visible */
+}
+
+.gm-style {
+  z-index: 1 !important; /* ✅ Ensures Google Maps elements are above Bootstrap */
+}

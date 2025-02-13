@@ -21,7 +21,6 @@ const AllTab = () => {
           id: doc.id, // Include document ID
           ...doc.data(), // Include all customer fields
         }));
-        console.log(customerList);
         setCustomers(customerList); // Update state
       })
       .catch((error) => {

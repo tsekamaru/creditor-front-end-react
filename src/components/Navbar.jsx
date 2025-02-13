@@ -59,6 +59,15 @@ function Navbar() {
                   About
                 </Link>
               </li>
+
+              <li className="nav-item ms-sm-2">
+                <Link
+                  className={`nav-link ${isActive("/contact", true) ? "active" : ""}`}
+                  to={"/contact"}
+                >
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
         )}
