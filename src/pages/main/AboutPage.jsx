@@ -11,6 +11,7 @@ import NpmLogo from "../../assets/npm-svgrepo-com.svg";
 import ReactLogo from "../../assets/react.svg";
 import ViteLogo from "../../assets/vite-svgrepo-com.svg";
 import VsCodeLogo from "../../assets/vscode-svgrepo-com.svg";
+import GoogleMapComponent from "../../components/googleMapComponent";
 
 function AboutPage() {
   return (
@@ -48,6 +49,10 @@ function AboutPage() {
         <TechCard title="FireBase" logo={FireBaseLogo} />
         <TechCard title="NodeJS" logo={NodeJsLogo} />
         <TechCard title="VSCode" logo={VsCodeLogo} />
+      </div>
+      <div className="mt-5">
+        <h4 className="mb-3">My Location</h4>
+        <GoogleMapComponent />
       </div>
     </div>
   );

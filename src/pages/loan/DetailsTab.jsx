@@ -76,12 +76,12 @@ const DetailsTab = () => {
     <div className="container mt-5">
       {/* Go back & update buttons */}
       <div className="d-flex justify-content-between align-items-center">
-        <button className="btn btn-success mb-3 fw-semibold" onClick={() => navigate(-1)}>
+        <button className="btn btn-outline-dark mb-3 fw-semibold" onClick={() => navigate(-1)}>
           <i className="bi bi-arrow-left"></i> Go Back
         </button>
 
         <button
-          className="btn btn-secondary mb-3 fw-semibold"
+          className="btn btn-outline-primary mb-3 fw-semibold"
           onClick={() => navigate(`/loans/update/${loanId}`)}
         >
           <i className="bi bi-pencil-square"></i> Update

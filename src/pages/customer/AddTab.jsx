@@ -72,7 +72,7 @@ const AddTab = () => {
   return (
     <div className="container mt-5">
       {/* Go back button */}
-      <button className="btn btn-success mb-3 fw-semibold" onClick={() => navigate(-1)}>
+      <button className="btn btn-outline-dark mb-3 fw-semibold" onClick={() => navigate(-1)}>
         <i className="bi bi-arrow-left"></i> Go Back
       </button>
 
@@ -198,7 +198,7 @@ const AddTab = () => {
             </div>
 
             <div className="my-2">
-              <button className="btn btn-primary fw-semibold">Submit</button>
+              <button className="btn btn-primary fw-semibold">Add Customer</button>
             </div>
           </form>
         </div>

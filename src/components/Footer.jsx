@@ -26,7 +26,7 @@ const Footer = () => {
         </a>
       </div>
       <blockquote className="blockquote mt-3">
-        <p className="fst-italic">Footer matters🔥</p>
+        <p className="fst-italic">Footer matters.</p>
         <p className="blockquote-footer">Lloyd Chambrier</p>
       </blockquote>
     </footer>

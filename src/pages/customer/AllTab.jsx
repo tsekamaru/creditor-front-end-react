@@ -5,6 +5,7 @@ import { db } from "../../firebase";
 import IdsContext from "../../contexts/IdsContext";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
+import DownloadButton from "../../components/DownloadButton";
 
 const AllTab = () => {
   const [customers, setCustomers] = useState([]); // Stores fetched customers
@@ -20,6 +21,7 @@ const AllTab = () => {
           id: doc.id, // Include document ID
           ...doc.data(), // Include all customer fields
         }));
+        console.log(customerList);
         setCustomers(customerList); // Update state
       })
       .catch((error) => {
@@ -33,7 +35,14 @@ const AllTab = () => {
 
   return (
     <div className="container">
-      <h1 className="text-center mb-4">Customers List</h1>
+      <div>
+        <h1 className="text-center mb-4">
+          Customers List
+          <div className="d-flex justify-content-end">
+            <DownloadButton inputData={customers} inputFileName="customersData" />
+          </div>
+        </h1>
+      </div>
       <div className="table-responsive">
         <table className="table table-hover">
           <thead>

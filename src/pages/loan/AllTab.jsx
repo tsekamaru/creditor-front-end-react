@@ -5,6 +5,7 @@ import { db } from "../../firebase";
 import IdsContext from "../../contexts/IdsContext";
 import errorHandler from "../../utils/errorHandler";
 import LoadingError from "../../components/LoadingError";
+import DownloadButton from "../../components/DownloadButton";
 
 const AllTab = () => {
   const [loans, setLoans] = useState([]);
@@ -33,7 +34,12 @@ const AllTab = () => {
 
   return (
     <div className="container">
-      <h1 className="text-center mb-4">Loans List</h1>
+      <h1 className="text-center mb-4">
+        Loans List
+        <div className="d-flex justify-content-end">
+          <DownloadButton inputData={loans} inputFileName="loansData" />
+        </div>
+      </h1>
       <div className="table-responsive">
         <table className="table table-hover">
           <thead>

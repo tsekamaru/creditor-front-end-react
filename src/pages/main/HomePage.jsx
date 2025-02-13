@@ -13,7 +13,7 @@ const HomePage = () => {
           />
         </div>
         <div className="col-md-6 d-flex justify-content-center align-items-center flex-column pt-5">
-          <h1 className="fw-bold">Can you make the perfect finance?</h1>
+          <h1 className="fw-bold">Are you looking for a perfect way to finance?</h1>
           <p className="fw-medium">
             Creditor is the most innovative and digitalized way to finance the micro-loaning.
           </p>
